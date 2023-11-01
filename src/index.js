@@ -5,6 +5,17 @@ const connectDB = require("./db/mongoose");
 
 const app = express();
 
+/* Milestone 2: Setting Up Promtheus and Grafana */
+const client = require('prom-client')
+// Create a Registry which registers the metrics
+const register = new client.Registry()
+// Add a default label which is added to all metrics
+register.setDefaultLabels({
+  app: 'tubes-apks-2023'
+})
+// Enable the collection of default metrics
+client.collectDefaultMetrics({ register })
+
 const start = async () => {
 	try {
 		await connectDB();
@@ -54,6 +65,12 @@ const start = async () => {
 		app.use(reservationRouter);
 		app.use(invitationsRouter);
 
+		// Return all metrics the Prometheus exposition format
+		app.get('/metrics', async (req, res) => {
+			res.set('Content-Type', register.contentType)
+			res.end(await register.metrics())
+		})
+
 		app.get("/health", (req, res) => {
 			res.send({ "API Server": "OK" });
 		});
@@ -63,7 +80,7 @@ const start = async () => {
 		app.get("/*", (req, res) => {
 			res.status(404).send({message : "path not found"});
 		});
-		app.listen(port, () => console.log(`app is running in PORT: ${port}`));
+		app.listen(port, () => console.log(`app is running in PORT: ${port}, Metrics are exposed on /metrics endpoint`));
 	} catch (err) {
 		console.log(err);
 		app.get("/health", (req, res) => {
