@@ -3,7 +3,7 @@ const { ProfilingIntegration } = require("@sentry/profiling-node");
 
 const sentryInit = (app) => {
     Sentry.init({
-        dsn: 'https://f531fb36ef17cb875a7985fed5017cf7@o4506153693020160.ingest.sentry.io/4506153699049472',
+        dsn: 'https://6526f7269046d41251e9115680752bef@o4506153693020160.ingest.sentry.io/4506224607821824',
         integrations: [
           // enable HTTP calls tracing
           new Sentry.Integrations.Http({ tracing: true }),
