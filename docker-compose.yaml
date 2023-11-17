@@ -61,21 +61,14 @@ services:
   grafana:
     hostname: grafana
     container_name: cinema-plus-grafana
-    image: grafana/grafana:latest
+    image: grafana/grafana-oss:latest
     restart: unless-stopped
     ports:
       - 3000:3000
     volumes:
       - grafana_data:/var/lib/grafana
       - ./grafana/provisioning:/etc/grafana/provisioning
-    deploy:
-      resources:
-        limits:
-          cpus: "1"
-          memory: 1024M
-        reservations:
-          cpus: "0.5"
-          memory: 512M
+      - ./grafana/datasource.yml:/etc/grafana/datasource.yml
   prometheus:
     hostname: prometheus
     container_name: cinema-plus-prometheus
@@ -84,17 +77,11 @@ services:
     ports:
       - 9090:9090
     volumes:
-      - ./prometheus:/etc/prometheus
+      - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
       - prometheus_data:/prometheus
-    deploy:
-      resources:
-        limits:
-          cpus: "1"
-          memory: 1024M
-        reservations:
-          cpus: "0.5"
-          memory: 512M
 volumes:
   db:
   prometheus_data:
+    driver: local
   grafana_data:
+    driver: local
