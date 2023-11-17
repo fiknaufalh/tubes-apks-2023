@@ -15,6 +15,7 @@
     "@sentry/profiling-node": "^1.2.6",
     "bcryptjs": "^2.4.3",
     "express": "^4.16.4",
+    "express-prom-bundle": "^6.6.0",
     "googleapis": "^39.2.0",
     "jsonwebtoken": "^8.5.1",
     "mongoose": "^5.5.4",

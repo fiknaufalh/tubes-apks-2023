@@ -5,19 +5,14 @@ const connectDB = require("./db/mongoose");
 const app = express();
 
 const prometheus = require("prom-client");
+const promBundle = require("express-prom-bundle");
+const metricsMiddleware = promBundle({includeMethod: true, includePath: true, includeStatusCode: true});
 
 // Create a Registry to register the metrics
-const register = new prometheus.Registry();
-prometheus.collectDefaultMetrics({register});
+// const register = new prometheus.Registry();
+// prometheus.collectDefaultMetrics({register});
 
 /** Debugging */
-const httpRequestDurationMicroseconds = new prometheus.Histogram({
-	name: 'http_request_duration_seconds',
-	help: 'Duration of HTTP requests in microseconds',
-	labelNames: ['method', 'route', 'code'],
-	buckets: [0.1, 0.3, 0.5, 0.7, 1, 3, 5, 7, 10]
-});
-register.registerMetric(httpRequestDurationMicroseconds)
 // Mock slow endpoint, waiting between 3 and 6 seconds to return a response
 const createDelayHandler = async (req, res) => {
 	if ((Math.floor(Math.random() * 100)) === 0) {
@@ -71,29 +66,23 @@ const start = async () => {
 			next();
 		});
 		app.use(express.json());
+		app.use(metricsMiddleware);
 		app.use(userRouter);
 		app.use(movieRouter);
 		app.use(cinemaRouter);
 		app.use(showtimeRouter);
 		app.use(reservationRouter);
 		app.use(invitationsRouter);
+		
 
 		app.get("/health", (req, res) => {
 			res.send({ "API Server": "OK" });
 		});
 
-		/* Prometheus Metrics Endpoint */
-		app.get('/metrics', async (req, res) => {
-			res.setHeader('Content-Type', register.contentType);
-			res.send(await register.metrics());
-		});
 
 		/* Debugging for slow request*/
 		app.get('/slow', async (req, res) => {
-			const end = httpRequestDurationMicroseconds.startTimer();
-			const route = req.route.path;
-			await createDelayHandler(req, res);
-			end({ route, code: res.statusCode, method: req.method });
+			await createDelayHandler(req, res);	
 		  });
 
 		// The "catchall" handler: for any request that doesn't

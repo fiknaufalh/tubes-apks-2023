@@ -58,6 +58,17 @@ services:
         reservations:
           cpus: "0.5"
           memory: 512M
+  node_exporter:
+    hostname: node_exporter
+    image: quay.io/prometheus/node-exporter:v1.5.0
+    container_name: node_exporter
+    command: "--path.rootfs=/host"
+    ports:
+      - 9100:9100
+    pid: host
+    restart: unless-stopped
+    volumes:
+      - /:/host:ro,rslave
   grafana:
     hostname: grafana
     container_name: cinema-plus-grafana
@@ -68,7 +79,6 @@ services:
     volumes:
       - grafana_data:/var/lib/grafana
       - ./grafana/provisioning:/etc/grafana/provisioning
-      - ./grafana/datasource.yml:/etc/grafana/datasource.yml
   prometheus:
     hostname: prometheus
     container_name: cinema-plus-prometheus
@@ -78,7 +88,7 @@ services:
       - 9090:9090
     volumes:
       - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
-      - prometheus_data:/prometheus
+      - ./prometheus_data:/prometheus
 volumes:
   db:
   prometheus_data:
