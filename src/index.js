@@ -4,33 +4,9 @@ const path = require("path");
 const connectDB = require("./db/mongoose");
 const app = express();
 
-/** Milestone 2 */
-// const { Sentry, sentryInit} = require("./utils/sentry");
-const Sentry = require("@sentry/node");
-const { ProfilingIntegration } = require("@sentry/profiling-node");
-Sentry.init({
-	dsn: 'https://6526f7269046d41251e9115680752bef@o4506153693020160.ingest.sentry.io/4506224607821824',
-	integrations: [
-	  // enable HTTP calls tracing
-	  new Sentry.Integrations.Http({ tracing: true }),
-	  // enable Express.js middleware tracing
-	  new Sentry.Integrations.Express({ app }),
-	  new ProfilingIntegration(),
-	],
-	// Performance Monitoring
-	tracesSampleRate: 1.0,
-	// Set sampling rate for profiling - this is relative to tracesSampleRate
-	profilesSampleRate: 1.0,
-});
 
 const start = async () => {
 	try {
-		// The request handler must be the first middleware on the app
-		app.use(Sentry.Handlers.requestHandler());
-		
-		// TracingHandler creates a trace for every incoming request
-		app.use(Sentry.Handlers.tracingHandler());
-
 		await connectDB();
 
 		if (process.env.NODE_ENV !== "production") {
@@ -92,18 +68,7 @@ const start = async () => {
 			res.status(404).send({message : "path not found"});
 		});
 
-		// The error handler must be registered before any other error middleware and after all controllers
-		app.use(Sentry.Handlers.errorHandler());
-			
-		// Optional fallthrough error handler
-		app.use(function onError(err, req, res, next) {
-		  // The error id is attached to `res.sentry` to be returned
-		  // and optionally displayed to the user for support.
-		  res.statusCode = 500;
-		  res.end(res.sentry + "\n");
-		});
-
-		app.listen(port, () => console.log(`app is running in PORT: ${port}, Metrics are exposed on /metrics endpoint`));
+		app.listen(port, () => console.log(`app is running in PORT: ${port}`));
 	} catch (err) {
 		console.log(err);
 		app.get("/health", (req, res) => {
