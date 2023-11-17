@@ -2,6 +2,7 @@ version: "3.8"
 name: "cinema-plus-be"
 services:
   mongo-express:
+    hostname: mongo-express
     image: mongo-express
     restart: always
     env_file: ./.env
@@ -13,6 +14,7 @@ services:
       ME_CONFIG_MONGODB_URL: mongodb://$MONGODB_USER:$MONGODB_PASSWORD@mongodb:27017/$MONGODB_DATABASE?authSource=admin
       ME_CONFIG_MONGODB_SERVER: mongodb
   mongodb:
+    hostname: mongo
     container_name: cinema-plus-mongodb
     image: mongo:6.0
     restart: unless-stopped
@@ -33,6 +35,7 @@ services:
           cpus: "0.5"
           memory: 512m
   app:
+    hostname: app
     container_name: cinema-plus-api
     depends_on:
       - mongodb
@@ -55,6 +58,43 @@ services:
         reservations:
           cpus: "0.5"
           memory: 512M
-
+  grafana:
+    hostname: grafana
+    container_name: cinema-plus-grafana
+    image: grafana/grafana:latest
+    restart: unless-stopped
+    ports:
+      - 3000:3000
+    volumes:
+      - grafana_data:/var/lib/grafana
+      - ./grafana/provisioning:/etc/grafana/provisioning
+    deploy:
+      resources:
+        limits:
+          cpus: "1"
+          memory: 1024M
+        reservations:
+          cpus: "0.5"
+          memory: 512M
+  prometheus:
+    hostname: prometheus
+    container_name: cinema-plus-prometheus
+    image: prom/prometheus:latest
+    restart: unless-stopped
+    ports:
+      - 9090:9090
+    volumes:
+      - ./prometheus:/etc/prometheus
+      - prometheus_data:/prometheus
+    deploy:
+      resources:
+        limits:
+          cpus: "1"
+          memory: 1024M
+        reservations:
+          cpus: "0.5"
+          memory: 512M
 volumes:
   db:
+  prometheus_data:
+  grafana_data:

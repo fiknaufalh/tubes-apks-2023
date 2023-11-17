@@ -1,0 +1,13 @@
+global:
+  scrape_interval: 15s #Scrape interval to every 15 seconds.
+  evaluation_interval: 15s #Evaluate rules every 15 seconds.
+  
+scrape_configs:
+    # metrics_path defaults to '/metrics'
+  - job_name: "prometheus"
+    static_configs:
+      - targets: ["localhost:9090"]
+
+  - job_name: "cinema-api"
+    static_configs:
+      - targets: ["app:5000"]
