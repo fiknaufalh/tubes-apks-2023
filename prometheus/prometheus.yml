@@ -1,0 +1,17 @@
+global:
+  scrape_interval: 15s #Scrape interval to every 15 seconds.
+  
+scrape_configs:
+    # metrics_path defaults to '/metrics'
+  - job_name: "prometheus"
+    scrape_interval: 5s
+    static_configs:
+      - targets: ["prometheus:9090"]
+
+  - job_name: "app"
+    static_configs:
+      - targets: ["app:5000"]
+
+  - job_name: 'node_exporter'
+    static_configs:
+      - targets: ['node_exporter:9100']

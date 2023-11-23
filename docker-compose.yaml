@@ -2,6 +2,7 @@ version: "3.8"
 name: "cinema-plus-be"
 services:
   mongo-express:
+    hostname: mongo-express
     image: mongo-express
     restart: always
     env_file: ./.env
@@ -13,6 +14,7 @@ services:
       ME_CONFIG_MONGODB_URL: mongodb://$MONGODB_USER:$MONGODB_PASSWORD@mongodb:27017/$MONGODB_DATABASE?authSource=admin
       ME_CONFIG_MONGODB_SERVER: mongodb
   mongodb:
+    hostname: mongo
     container_name: cinema-plus-mongodb
     image: mongo:6.0
     restart: unless-stopped
@@ -33,6 +35,7 @@ services:
           cpus: "0.5"
           memory: 512m
   app:
+    hostname: app
     container_name: cinema-plus-api
     depends_on:
       - mongodb
@@ -55,6 +58,40 @@ services:
         reservations:
           cpus: "0.5"
           memory: 512M
-
+  node_exporter:
+    hostname: node_exporter
+    image: quay.io/prometheus/node-exporter:v1.5.0
+    container_name: node_exporter
+    command: "--path.rootfs=/host"
+    ports:
+      - 9100:9100
+    pid: host
+    restart: unless-stopped
+    volumes:
+      - /:/host:ro,rslave
+  grafana:
+    hostname: grafana
+    container_name: cinema-plus-grafana
+    image: grafana/grafana-oss:latest
+    restart: unless-stopped
+    ports:
+      - 3000:3000
+    volumes:
+      - grafana_data:/var/lib/grafana
+      - ./grafana/provisioning:/etc/grafana/provisioning
+  prometheus:
+    hostname: prometheus
+    container_name: cinema-plus-prometheus
+    image: prom/prometheus:latest
+    restart: unless-stopped
+    ports:
+      - 9090:9090
+    volumes:
+      - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
+      - ./prometheus_data:/prometheus
 volumes:
   db:
+  prometheus_data:
+    driver: local
+  grafana_data:
+    driver: local

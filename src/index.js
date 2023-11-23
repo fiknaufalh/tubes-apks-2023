@@ -4,33 +4,28 @@ const path = require("path");
 const connectDB = require("./db/mongoose");
 const app = express();
 
-/** Milestone 2 */
-// const { Sentry, sentryInit} = require("./utils/sentry");
-const Sentry = require("@sentry/node");
-const { ProfilingIntegration } = require("@sentry/profiling-node");
-Sentry.init({
-	dsn: 'https://6526f7269046d41251e9115680752bef@o4506153693020160.ingest.sentry.io/4506224607821824',
-	integrations: [
-	  // enable HTTP calls tracing
-	  new Sentry.Integrations.Http({ tracing: true }),
-	  // enable Express.js middleware tracing
-	  new Sentry.Integrations.Express({ app }),
-	  new ProfilingIntegration(),
-	],
-	// Performance Monitoring
-	tracesSampleRate: 1.0,
-	// Set sampling rate for profiling - this is relative to tracesSampleRate
-	profilesSampleRate: 1.0,
-});
+const prometheus = require("prom-client");
+const promBundle = require("express-prom-bundle");
+const metricsMiddleware = promBundle({includeMethod: true, includePath: true, includeStatusCode: true});
+
+// Create a Registry to register the metrics
+// const register = new prometheus.Registry();
+// prometheus.collectDefaultMetrics({register});
+
+/** Debugging */
+// Mock slow endpoint, waiting between 3 and 6 seconds to return a response
+const createDelayHandler = async (req, res) => {
+	if ((Math.floor(Math.random() * 100)) === 0) {
+	  throw new Error('Internal Error')
+	}
+	// Generate number between 3-6, then delay by a factor of 1000 (miliseconds)
+	const delaySeconds = Math.floor(Math.random() * (6 - 3)) + 3
+	await new Promise(res => setTimeout(res, delaySeconds * 1000))
+	res.end('Slow url accessed!');
+};
 
 const start = async () => {
 	try {
-		// The request handler must be the first middleware on the app
-		app.use(Sentry.Handlers.requestHandler());
-		
-		// TracingHandler creates a trace for every incoming request
-		app.use(Sentry.Handlers.tracingHandler());
-
 		await connectDB();
 
 		if (process.env.NODE_ENV !== "production") {
@@ -71,39 +66,33 @@ const start = async () => {
 			next();
 		});
 		app.use(express.json());
+		app.use(metricsMiddleware);
 		app.use(userRouter);
 		app.use(movieRouter);
 		app.use(cinemaRouter);
 		app.use(showtimeRouter);
 		app.use(reservationRouter);
 		app.use(invitationsRouter);
+		
 
 		app.get("/health", (req, res) => {
 			res.send({ "API Server": "OK" });
 		});
 
-		// app.get("/debug-sentry", function mainHandler(req, res) {
-		// 	throw new Error("My first Sentry error!");
-		// });
-		
+
+		/* Debugging for slow request*/
+		app.get('/slow', async (req, res) => {
+			await createDelayHandler(req, res);	
+		  });
+
 		// The "catchall" handler: for any request that doesn't
 		// match one above, send back React's index.html file.
 		app.get("/*", (req, res) => {
 			res.status(404).send({message : "path not found"});
 		});
 
-		// The error handler must be registered before any other error middleware and after all controllers
-		app.use(Sentry.Handlers.errorHandler());
-			
-		// Optional fallthrough error handler
-		app.use(function onError(err, req, res, next) {
-		  // The error id is attached to `res.sentry` to be returned
-		  // and optionally displayed to the user for support.
-		  res.statusCode = 500;
-		  res.end(res.sentry + "\n");
-		});
+		app.listen(port, () => console.log(`app is running in PORT: ${port}, metrics can be accessed using '/metrics' endpoint`));
 
-		app.listen(port, () => console.log(`app is running in PORT: ${port}, Metrics are exposed on /metrics endpoint`));
 	} catch (err) {
 		console.log(err);
 		app.get("/health", (req, res) => {
