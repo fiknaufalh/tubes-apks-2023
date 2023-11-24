@@ -9,6 +9,9 @@ RUN npm install
 # If you are building your code for production
 # RUN npm ci --omit=dev
 # Bundle app source
+RUN apk add --no-cache nodejs npm
+RUN npm install -g faker
+
 COPY . .
 EXPOSE 5000
 CMD [ "node", "src/index.js" ]
