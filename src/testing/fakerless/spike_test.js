@@ -1,6 +1,5 @@
 import { check } from "k6";
 import http from "k6/http";
-require("dotenv").config();
 
 export const options = {
 	insecureSkipTLSVerify: true,
@@ -17,7 +16,7 @@ export const options = {
 };
 
 const PORT = process.env.PORT || 5000;
-const API_BASE_URL = `https://localhost:${PORT}`;
+const API_BASE_URL = `https://localhost:5000`;
 
 const names = ["John Doe", "Jane Doe", "Alice", "Bob", "Charlie"];
 const usernames = ["john_doe", "jane_doe", "alice", "bob", "charlie"];
