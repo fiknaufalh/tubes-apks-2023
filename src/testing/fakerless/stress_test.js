@@ -17,8 +17,7 @@ export const options = {
 	],
 };
 
-const PORT = process.env.PORT || 5000;
-const API_BASE_URL = `https://localhost:5000`;
+const API_BASE_URL = `http://localhost:5000`;
 
 const names = ["John Doe", "Jane Doe", "Alice", "Bob", "Charlie"];
 const usernames = ["john_doe", "jane_doe", "alice", "bob", "charlie"];
@@ -29,13 +28,22 @@ const emails = [
 	"bob@example.com",
 	"charlie@example.com",
 ];
+const phoneNumbers = [
+	"1234567890", 
+	"0987654321",
+	"1231231234",
+	"3213213214",
+	"4564564567",
+	"6546546547",
+	"7897897890",];
 
 export default function () {
 	const randomName = names[Math.floor(Math.random() * names.length)];
 	const randomUsername =
 		usernames[Math.floor(Math.random() * usernames.length)];
 	const randomEmail = emails[Math.floor(Math.random() * emails.length)];
-	const randomPassword = "your_random_password";
+	const randomPassword = "ran_word";
+	const randomPhone = phoneNumbers[Math.floor(Math.random() * phoneNumbers.length)];
 	const role = "admin";
 
 	const registerRes = http.post(`${API_BASE_URL}/register`, {
@@ -43,6 +51,7 @@ export default function () {
 		username: randomUsername,
 		email: randomEmail,
 		password: randomPassword,
+		phone: randomPhone,
 		role: "admin",
 	});
 

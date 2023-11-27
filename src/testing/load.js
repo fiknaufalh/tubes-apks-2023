@@ -6,15 +6,15 @@ export const options = {
   noConnectionReuse: true,
   stages: [
     {
-        duration: '2m',
+        duration: '1m',
         target: 400,
     },
     {
-        duration: '2m',
+        duration: '1m',
         target: 400,
     },
     {
-        duration: '2m',
+        duration: '30s',
         target: 0,
     },
   ],
