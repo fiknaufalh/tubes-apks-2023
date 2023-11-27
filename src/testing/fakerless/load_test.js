@@ -24,13 +24,11 @@ const emails = [
 	"charlie@example.com",
 ];
 const phoneNumbers = [
-	"1234567890", 
-	"0987654321",
-	"1231231234",
-	"3213213214",
-	"4564564567",
-	"6546546547",
-	"7897897890",];
+	"082793878279", 
+	"081278728392",
+	"087283782822",
+	"082435237333",
+	"081382947932",];
 
 export default function () {
 	const randomName = names[Math.floor(Math.random() * names.length)];
@@ -42,11 +40,11 @@ export default function () {
 	const role = "admin";
 
 	const registerRes = http.post(`${API_BASE_URL}/users`, {
-		name: "Sample Name",
-		username: "sample_username",
-		email: "sample_email",
-		password: "sample_pass",
-		phone: "8129381902380912312",
+		name: randomName,
+		username: randomUsername,
+		email: randomEmail,
+		password: randomPassword,
+		phone: randomPhone,
 		role: "admin",
 	});
 

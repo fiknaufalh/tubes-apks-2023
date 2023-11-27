@@ -1,7 +1,6 @@
 import { check } from "k6";
 import http from "k6/http";
-import faker from "faker";
-require("dotenv").config();
+import * as faker from 'faker/locale/en_US'; 
 
 export const options = {
 	insecureSkipTLSVerify: true,
@@ -13,19 +12,18 @@ export const options = {
 	],
 };
 
-const PORT = process.env.PORT || 5000;
-const API_BASE_URL = `https://localhost:${PORT}`;
+const API_BASE_URL = `http://localhost:5000`;
 
 export default function () {
 	unixTimeStamp = Math.floor(date.getTime() / 1000);
 
-	const randomName = faker.name.findName();
+	const randomName = faker.name.firstName();
 	const randomUsername = `${unixTimeStamp} ${faker.internet.userName()}`;
 	const randomEmail = faker.internet.email();
 	const randomPassword = faker.internet.password();
 	const role = "admin";
 
-	const registerRes = http.post(`${API_BASE_URL}/register`, {
+	const registerRes = http.post(`${API_BASE_URL}/users`, {
 		name: randomName,
 		username: randomUsername,
 		email: randomEmail,
