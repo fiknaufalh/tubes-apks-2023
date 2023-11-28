@@ -1,0 +1,1 @@
+web: k6 run /src/testing/fakerless/load_test.js
