@@ -1,90 +1,116 @@
-import { check } from "k6";
+import { check, sleep } from "k6";
 import http from "k6/http";
-import * as faker from 'faker/locale/en_US'; 
 
 export const options = {
-	insecureSkipTLSVerify: true,
-	noConnectionReuse: false,
-	stages: [
-		{ duration: "1m", target: 400 }, // ramp up to 400 users
-		{ duration: "8m", target: 400 }, // stay at 400 ~10 minute
-		{ duration: "1m", target: 0 }, // scale down. (optional)
-	],
+  insecureSkipTLSVerify: true,
+  noConnectionReuse: false,
+  stages: [
+    { duration: "1m", target: 400 }, // ramp up to 400 users
+    { duration: "8m", target: 400 }, // stay at 400 ~10 minute
+    { duration: "1m", target: 0 }, // scale down. (optional)
+  ],
 };
 
+// const PORT = process.env.PORT || 5000;
 const API_BASE_URL = `http://localhost:5000`;
 
+// let registrationDone = false;
+let token; // Declare token at a higher scope
+
 export default function () {
-	unixTimeStamp = Math.floor(date.getTime() / 1000);
+  const currentUnixTime = Math.floor(new Date().getTime() / 1000);
+  const randomName = `Test User ${currentUnixTime}`;
+  const randomUsername = `testuser${currentUnixTime}`;
+  const randomEmail = `${currentUnixTime}@gmail.com`;
+  const randomPassword = `testuser${currentUnixTime}`;
+  const randomPhone = `${currentUnixTime % 1000000000000}`;
+  const role = "admin";
 
-	const randomName = faker.name.firstName();
-	const randomUsername = `${unixTimeStamp} ${faker.internet.userName()}`;
-	const randomEmail = faker.internet.email();
-	const randomPassword = faker.internet.password();
-	const role = "admin";
+  const registrationPayload = {
+    name: randomName,
+    username: randomUsername,
+    email: randomEmail,
+    password: randomPassword,
+    role: role,
+    phone: randomPhone,
+  };
 
-	const registerRes = http.post(`${API_BASE_URL}/users`, {
-		name: randomName,
-		username: randomUsername,
-		email: randomEmail,
-		password: randomPassword,
-		role: "admin",
-	});
+  const registrationHeaders = { "Content-Type": "application/json" };
 
-	check(registerRes, {
-		"is status 201": (r) => r.status === 201,
-	});
+  const registrationResponse = http.post(
+    `${API_BASE_URL}/users`,
+    JSON.stringify(registrationPayload),
+    {
+      headers: registrationHeaders,
+    }
+  );
 
-	const loginRes = http.post(`${API_BASE_URL}/login`, {
-		username: randomUsername,
-		password: randomPassword,
-	});
+  check(registrationResponse, {
+    "Registration successful": (resp) => resp.status === 201,
+  });
 
-	check(loginRes, {
-		"is status 200": (r) => r.status === 200,
-	});
+  // Set token to the value obtained from the registration response
+  token = registrationResponse.json().token;
 
-	const authHeaders = {
-		headers: {
-			Authorization: `Bearer ${loginRes.json("token")}`,
-		},
-	};
+  // Set registrationDone to true to indicate that registration has been done
+//   registrationDone = true;
 
-	const createReservationsRes = http.post(
-		`${API_BASE_URL}/reservations`,
-		{
-			date: faker.date.future(),
-			startAt: faker.date.future().toString(),
-			seats: [faker.random.number()],
-			ticketPrice: faker.random.number(),
-			total: faker.random.number(),
-			movieId: faker.random.number(),
-			cinemaId: faker.random.number(),
-			username: `${unixTimeStamp} ${faker.internet.userName()}`,
-			phone: faker.internet.phoneNumber(),
-		},
-		authHeaders
-	);
+  // Sleep for a short duration before making the next request
+  sleep(2);
 
-	check(createReservationsRes, {
-		"is status 200": (r) => r.status === 200,
-	});
+  const loginPayload = {
+    username: randomUsername,
+    password: randomPassword,
+  };
 
-	const createInvitationRes = http.post(
-		`${API_BASE_URL}/invitations`,
-		{
-			host: faker.name.findName(),
-			movie: faker.random.string(),
-			date: faker.date.future().toString(),
-			time: faker.date.future().toString(),
-			cinema: faker.random.string(),
-			image: faker.random.string(),
-			seats: [faker.random.number()],
-		},
-		authHeaders
-	);
+  const loginHeaders = { "Content-Type": "application/json" };
 
-	check(createInvitationRes, {
-		"is status 201": (r) => r.status === 201,
-	});
+  const loginResponse = http.post(
+    `${API_BASE_URL}/users/login`,
+    JSON.stringify(loginPayload),
+    {
+      headers: loginHeaders,
+    }
+  );
+
+  check(loginResponse, {
+    "Login successful": (resp) => resp.status === 200,
+  });
+
+  // Sleep for a short duration before making the next request
+  sleep(1);
+
+  const reservationPayload = {
+    date: "2023/09/24",
+    startAt: "bandung",
+    seats: ["B"],
+    ticketPrice: 50000,
+    total: 1,
+    movieId: "650d3fa4dd4dc724ef947f6c",
+    cinemaId: "650c5c2ee1101d1be65d8a48",
+    username: "wisnuas",
+    phone: "08123456789",
+    checkin: false,
+  };
+  const reservationHeaders = { "Content-Type": "application/json" };
+
+  const reservationResponse = http.post(
+    `${API_BASE_URL}/reservations`,
+    JSON.stringify(reservationPayload),
+    {
+      headers: reservationHeaders,
+    }
+  );
+
+  check(reservationResponse, {
+    "is status 201": (r) => r.status === 201,
+  });
+
+  sleep(1);
+
+  const getShowtimes = http.get(`${API_BASE_URL}/showtimes`);
+
+  check(getShowtimes, {
+    "is status 200": (r) => r.status === 200,
+  });
 }
