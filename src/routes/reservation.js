@@ -7,7 +7,7 @@ const generateQR = require('../utils/generateQRCode');
 const router = new express.Router();
 
 // Create a reservation
-router.post('/reservations', auth.simple, async (req, res) => {
+router.post('/reservations', async (req, res) => {
   const reservation = new Reservation(req.body);
 
   const QRCode = await generateQR(`https://elcinema.herokuapp.com/#/checkin/${reservation._id}`);

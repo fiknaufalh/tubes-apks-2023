@@ -27,7 +27,7 @@ const createMailOptions = (data) => {
 };
 
 // Send Invitation Emails
-router.post('/invitations', auth.simple, async (req, res) => {
+router.post('/invitations', async (req, res) => {
   const invitations = req.body;
   const promises = invitations.map((invitation) => {
     const mailOptions = createMailOptions(invitation);
