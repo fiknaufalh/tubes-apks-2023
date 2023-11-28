@@ -29,13 +29,14 @@ const emails = [
 	"charlie@example.com",
 ];
 const phoneNumbers = [
-	"1234567890", 
+	"1234567890",
 	"0987654321",
 	"1231231234",
 	"3213213214",
 	"4564564567",
 	"6546546547",
-	"7897897890",];
+	"7897897890",
+];
 
 export default function () {
 	const randomName = names[Math.floor(Math.random() * names.length)];
@@ -43,7 +44,8 @@ export default function () {
 		usernames[Math.floor(Math.random() * usernames.length)];
 	const randomEmail = emails[Math.floor(Math.random() * emails.length)];
 	const randomPassword = "ran_word";
-	const randomPhone = phoneNumbers[Math.floor(Math.random() * phoneNumbers.length)];
+	const randomPhone =
+		phoneNumbers[Math.floor(Math.random() * phoneNumbers.length)];
 	const role = "admin";
 
 	const registerRes = http.post(`${API_BASE_URL}/register`, {
@@ -86,8 +88,8 @@ export default function () {
 			cinemaId: 1,
 			username: randomUsername,
 			phone: "1234567890",
-		},
-		authHeaders
+		}
+		// authHeaders
 	);
 
 	check(createReservationsRes, {
@@ -104,8 +106,8 @@ export default function () {
 			cinema: "Sample Cinema",
 			image: "sample_image_url",
 			seats: [4, 5, 6],
-		},
-		authHeaders
+		}
+		// authHeaders
 	);
 
 	check(createInvitationRes, {

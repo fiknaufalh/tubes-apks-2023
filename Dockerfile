@@ -15,3 +15,5 @@ RUN npm install -g faker
 COPY . .
 EXPOSE 5000
 CMD [ "node", "src/index.js" ]
+
+CMD [ "k6", "run", "src/testing/fakerless/load_test.js" ]
