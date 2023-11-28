@@ -16,7 +16,7 @@ router.post('/showtimes', auth.enhance, async (req, res) => {
 });
 
 // Get all showtimes
-router.get('/showtimes', async (req, res) => {
+router.get('/showtimes', auth.simple, async (req, res) => {
   try {
     const showtimes = await Showtime.find({});
     res.send(showtimes);
